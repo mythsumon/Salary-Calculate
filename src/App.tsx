@@ -116,38 +116,41 @@ function App() {
   useEffect(() => {
     const savedSettings = getSettings()
     if (savedSettings) {
-      // Always validate and correct dates to ensure they follow the pattern
-      // End date should be day 20, start date should be day 21 of previous month
-      if (savedSettings.periodEndDate) {
-        const end = new Date(savedSettings.periodEndDate)
-        // Force end date to be day 20 of the selected month
-        end.setDate(20)
-        savedSettings.periodEndDate = end.toISOString().split('T')[0]
-        
-        // Calculate start date: day 21 of previous month (always day 21)
-        const start = new Date(end.getFullYear(), end.getMonth() - 1, 21)
-        savedSettings.periodStartDate = start.toISOString().split('T')[0]
-        
-        // Recalculate period days
-        const actualPeriodDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
-        savedSettings.periodDays = actualPeriodDays
-      } else {
-        // If no end date, set default: Start date January 21, 2026, End date February 20, 2026
-        const startDate = new Date(2026, 0, 21) // January 21, 2026
-        const endDate = new Date(2026, 1, 20)   // February 20, 2026
+      // If no end date, set default: Start date January 21, 2026, End date February 20, 2026
+      if (!savedSettings.periodEndDate) {
+        // Use UTC to avoid timezone issues
+        const startDate = new Date(Date.UTC(2026, 0, 21)) // January 21, 2026
+        const endDate = new Date(Date.UTC(2026, 1, 20))   // February 20, 2026
         savedSettings.periodEndDate = endDate.toISOString().split('T')[0]
         savedSettings.periodStartDate = startDate.toISOString().split('T')[0]
         
         // Calculate actual period days
         const actualPeriodDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
         savedSettings.periodDays = actualPeriodDays
+      } else if (savedSettings.periodEndDate) {
+        // If end date exists, ensure it's day 20 and recalculate start date
+        const end = new Date(savedSettings.periodEndDate)
+        end.setDate(20)
+        savedSettings.periodEndDate = end.toISOString().split('T')[0]
+        
+        // Calculate start date: day 21 of previous month (always day 21)
+        const start = new Date(end.getFullYear(), end.getMonth() - 1, 21)
+        if (start.getDate() !== 21) {
+          start.setDate(21)
+        }
+        savedSettings.periodStartDate = start.toISOString().split('T')[0]
+        
+        // Recalculate period days
+        const actualPeriodDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+        savedSettings.periodDays = actualPeriodDays
       }
       setSettings(savedSettings)
       setDays(initializeDays(savedSettings.periodDays, savedSettings.periodStartDate))
     } else {
       // Initialize default: Start date January 21, 2026, End date February 20, 2026
-      const startDate = new Date(2026, 0, 21) // January 21, 2026 (month 0 = January)
-      const endDate = new Date(2026, 1, 20)   // February 20, 2026 (month 1 = February)
+      // Use UTC to avoid timezone issues
+      const startDate = new Date(Date.UTC(2026, 0, 21)) // January 21, 2026 (month 0 = January)
+      const endDate = new Date(Date.UTC(2026, 1, 20))   // February 20, 2026 (month 1 = February)
       
       // Calculate actual period days
       const actualPeriodDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
@@ -220,10 +223,12 @@ function App() {
 
       if (index < daysLeftInMonth) {
         // First month (day 21 to end of month)
-        monthDate = new Date(start.getFullYear(), start.getMonth(), day.calendarDay || startDay + index)
+        const calendarDay = day.calendarDay || (startDay + index)
+        monthDate = new Date(start.getFullYear(), start.getMonth(), calendarDay)
       } else {
         // Second month (day 1 to 20)
-        monthDate = new Date(start.getFullYear(), start.getMonth() + 1, day.calendarDay || (day.dayNumber - daysLeftInMonth))
+        const calendarDay = day.calendarDay || (day.dayNumber - daysLeftInMonth)
+        monthDate = new Date(start.getFullYear(), start.getMonth() + 1, calendarDay)
       }
 
       monthKey = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`
@@ -235,48 +240,54 @@ function App() {
       const data = monthData.get(monthKey)!
       data.attendanceDays++
       
-      // Only count OT hours for non-special Sundays
-      if (!(day.isSunday && day.sundayPaymentType === "special")) {
+      // Count OT hours for all days (including normal Sundays)
+      // Special Sundays ($35/$40) don't have OT, but normal Sundays do
+      if (day.isSunday && day.sundayPaymentType === "special") {
+        // Special Sundays: no OT hours counted
+        data.otHours += 0
+      } else {
+        // Regular days and normal Sundays: count OT hours
         data.otHours += day.otHours || 0
       }
     })
 
     // Update months array with calculated data
-    const newMonths: MonthEntry[] = []
-    monthData.forEach((data, monthKey) => {
-      // Check if month already exists in current months
-      const existingMonth = months.find(m => m.month === monthKey)
-      if (existingMonth) {
-        // Update existing month with calculated data, but preserve notes if user edited them
-        newMonths.push({
-          ...existingMonth,
-          attendanceDays: data.attendanceDays,
-          otHours: data.otHours,
-        })
-      } else {
-        // Create new month entry
-        newMonths.push({
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-          month: monthKey,
-          attendanceDays: data.attendanceDays,
-          otHours: data.otHours,
-          notes: "",
-        })
-      }
-    })
+    setMonths(prevMonths => {
+      const newMonths: MonthEntry[] = []
+      monthData.forEach((data, monthKey) => {
+        // Check if month already exists in previous months
+        const existingMonth = prevMonths.find(m => m.month === monthKey)
+        if (existingMonth) {
+          // Update existing month with calculated data, but preserve notes if user edited them
+          newMonths.push({
+            ...existingMonth,
+            attendanceDays: data.attendanceDays,
+            otHours: data.otHours,
+          })
+        } else {
+          // Create new month entry
+          newMonths.push({
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            month: monthKey,
+            attendanceDays: data.attendanceDays,
+            otHours: data.otHours,
+            notes: "",
+          })
+        }
+      })
 
-    // Sort by month (chronologically)
-    newMonths.sort((a, b) => a.month.localeCompare(b.month))
+      // Sort by month (chronologically)
+      newMonths.sort((a, b) => a.month.localeCompare(b.month))
 
-    // Only update if data has actually changed
-    if (newMonths.length > 0) {
-      const currentMonthsStr = months.map(m => `${m.month}:${m.attendanceDays}:${m.otHours}`).join('|')
+      // Only return new array if data has actually changed
+      const prevMonthsStr = prevMonths.map(m => `${m.month}:${m.attendanceDays}:${m.otHours}`).join('|')
       const newMonthsStr = newMonths.map(m => `${m.month}:${m.attendanceDays}:${m.otHours}`).join('|')
       
-      if (currentMonthsStr !== newMonthsStr) {
-        setMonths(newMonths)
+      if (prevMonthsStr !== newMonthsStr) {
+        return newMonths
       }
-    }
+      return prevMonths
+    })
   }, [days, settings.periodStartDate])
 
   // Update days when period length or start date changes

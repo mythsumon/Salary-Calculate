@@ -21,8 +21,8 @@ export function SettingsForm({ settings, onSettingsChange }: SettingsFormProps) 
             id="periodEndDate"
             type="date"
             value={settings.periodEndDate || (() => {
-              // Default: February 20, 2026
-              const endDate = new Date(2026, 1, 20)
+              // Default: February 20, 2026 (use UTC to avoid timezone issues)
+              const endDate = new Date(Date.UTC(2026, 1, 20))
               return endDate.toISOString().split('T')[0]
             })()}
             onChange={(e) => {
@@ -65,8 +65,8 @@ export function SettingsForm({ settings, onSettingsChange }: SettingsFormProps) 
             id="periodStartDate"
             type="date"
             value={settings.periodStartDate || (() => {
-              // Default: January 21, 2026
-              const startDate = new Date(2026, 0, 21)
+              // Default: January 21, 2026 (use UTC to avoid timezone issues)
+              const startDate = new Date(Date.UTC(2026, 0, 21))
               return startDate.toISOString().split('T')[0]
             })()}
             onChange={(e) => {
