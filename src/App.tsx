@@ -18,7 +18,7 @@ import { exportToPDF } from "@/lib/pdfExport"
 import { Sparkles } from "lucide-react"
 
 const DEFAULT_SETTINGS: Settings = {
-  periodDays: 20, // Will be calculated based on day 21 to day 20
+  periodDays: 31, // Default: day 21 of one month to day 20 of next month
   normalDailyPay: 23,
   normalWorkHours: 8,
   otRate: 4.32,
