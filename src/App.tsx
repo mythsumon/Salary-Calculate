@@ -116,8 +116,23 @@ function App() {
   useEffect(() => {
     const savedSettings = getSettings()
     if (savedSettings) {
-      // If no end date, set default: Start date January 21, 2026, End date February 20, 2026
-      if (!savedSettings.periodEndDate) {
+      // Always validate and correct dates to ensure they follow the pattern
+      // End date should be day 20, start date should be day 21 of previous month
+      if (savedSettings.periodEndDate) {
+        const end = new Date(savedSettings.periodEndDate)
+        // Force end date to be day 20 of the selected month
+        end.setDate(20)
+        savedSettings.periodEndDate = end.toISOString().split('T')[0]
+        
+        // Calculate start date: day 21 of previous month (always day 21)
+        const start = new Date(end.getFullYear(), end.getMonth() - 1, 21)
+        savedSettings.periodStartDate = start.toISOString().split('T')[0]
+        
+        // Recalculate period days
+        const actualPeriodDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+        savedSettings.periodDays = actualPeriodDays
+      } else {
+        // If no end date, set default: Start date January 21, 2026, End date February 20, 2026
         const startDate = new Date(2026, 0, 21) // January 21, 2026
         const endDate = new Date(2026, 1, 20)   // February 20, 2026
         savedSettings.periodEndDate = endDate.toISOString().split('T')[0]
@@ -125,22 +140,6 @@ function App() {
         
         // Calculate actual period days
         const actualPeriodDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
-        savedSettings.periodDays = actualPeriodDays
-      } else if (savedSettings.periodEndDate) {
-        // If end date exists, ensure it's day 20 and recalculate start date
-        const end = new Date(savedSettings.periodEndDate)
-        end.setDate(20)
-        savedSettings.periodEndDate = end.toISOString().split('T')[0]
-        
-        // Calculate start date: day 21 of previous month (always day 21)
-        const start = new Date(end.getFullYear(), end.getMonth() - 1, 21)
-        if (start.getDate() !== 21) {
-          start.setDate(21)
-        }
-        savedSettings.periodStartDate = start.toISOString().split('T')[0]
-        
-        // Recalculate period days
-        const actualPeriodDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
         savedSettings.periodDays = actualPeriodDays
       }
       setSettings(savedSettings)
