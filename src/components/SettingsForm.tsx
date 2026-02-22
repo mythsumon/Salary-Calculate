@@ -77,11 +77,11 @@ export function SettingsForm({ settings, onSettingsChange }: SettingsFormProps) 
                 start.setDate(21)
                 const correctedStartDate = start.toISOString().split('T')[0]
                 
-                // Automatically calculate end date: day 20 of the next month
+                // Automatically calculate end date: day 20 of the NEXT month
                 const end = new Date(start.getFullYear(), start.getMonth() + 1, 20)
                 const correctedEndDate = end.toISOString().split('T')[0]
                 
-                // Calculate actual period days
+                // Calculate actual period days: from day 21 of current month to day 20 of next month
                 const actualPeriodDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
                 
                 onSettingsChange({

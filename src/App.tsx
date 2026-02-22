@@ -116,7 +116,6 @@ function App() {
   useEffect(() => {
     const savedSettings = getSettings()
     if (savedSettings) {
-      // Always correct dates to ensure start is day 21 and end is day 20
       if (savedSettings.periodEndDate) {
         // If end date exists, ensure it's day 20 and recalculate start date
         const end = new Date(savedSettings.periodEndDate)
@@ -134,7 +133,7 @@ function App() {
         const actualPeriodDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
         savedSettings.periodDays = actualPeriodDays
       } else if (savedSettings.periodStartDate) {
-        // If only start date exists, calculate end date from it
+        // If only start date exists, calculate end date: day 20 of next month
         const start = new Date(savedSettings.periodStartDate)
         start.setDate(21)
         savedSettings.periodStartDate = start.toISOString().split('T')[0]
@@ -157,8 +156,6 @@ function App() {
         const actualPeriodDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
         savedSettings.periodDays = actualPeriodDays
       }
-      // Save corrected settings back to localStorage
-      saveSettings(savedSettings)
       setSettings(savedSettings)
       setDays(initializeDays(savedSettings.periodDays, savedSettings.periodStartDate))
     } else {
