@@ -73,7 +73,7 @@ export function SettingsForm({ settings, onSettingsChange }: SettingsFormProps) 
               const startDate = e.target.value
               if (startDate) {
                 const start = new Date(startDate)
-                // Ensure start date is day 21 of the selected month
+                // Ensure start date is day 21
                 start.setDate(21)
                 const correctedStartDate = start.toISOString().split('T')[0]
                 
