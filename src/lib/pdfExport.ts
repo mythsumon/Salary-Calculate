@@ -12,7 +12,9 @@ export function exportToPDF(period: PeriodData, result: CalculationResult) {
   
   // Date
   doc.setFontSize(10)
-  doc.text(`Period: ${format(new Date(period.date), 'PPP')}`, 14, 30)
+  const periodDateStr = period.date || new Date().toISOString()
+  const periodDate = new Date(periodDateStr)
+  doc.text(`Period: ${format(periodDate, 'PPP')}`, 14, 30)
   
   let y = 40
   
@@ -56,9 +58,10 @@ export function exportToPDF(period: PeriodData, result: CalculationResult) {
   
   y += 5
   doc.setFontSize(12)
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text(`Net Pay: ${formatCurrency(result.netPay)}`, 14, y)
   
   // Save
-  doc.save(`salary-report-${format(new Date(period.date), 'yyyy-MM-dd')}.pdf`)
+  const reportDate = format(periodDate, 'yyyy-MM-dd')
+  doc.save(`salary-report-${reportDate}.pdf`)
 }
