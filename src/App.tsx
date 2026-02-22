@@ -439,12 +439,23 @@ function App() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 pb-24 md:pb-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <div className="sticky top-[73px] z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b mb-6 -mx-4 px-4 pb-2">
-            <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="calculator">Calculator</TabsTrigger>
-            <TabsTrigger value="period">Period Editor</TabsTrigger>
-            <TabsTrigger value="bonuses">Bonuses & Deductions</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
+          <div className="sticky top-[73px] z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b mb-6 -mx-4 px-2 sm:px-4 pb-2">
+            <TabsList className="grid w-full grid-cols-4 gap-0.5 sm:gap-1">
+            <TabsTrigger value="calculator" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 md:px-3 py-1.5 truncate">
+              <span className="hidden md:inline">Calculator</span>
+              <span className="md:hidden">Calc</span>
+            </TabsTrigger>
+            <TabsTrigger value="period" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 md:px-3 py-1.5 truncate">
+              <span className="hidden md:inline">Period Editor</span>
+              <span className="md:hidden">Period</span>
+            </TabsTrigger>
+            <TabsTrigger value="bonuses" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 md:px-3 py-1.5 truncate">
+              <span className="hidden md:inline">Bonuses & Deductions</span>
+              <span className="md:hidden">Bonuses</span>
+            </TabsTrigger>
+            <TabsTrigger value="history" className="text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 md:px-3 py-1.5 truncate">
+              History
+            </TabsTrigger>
           </TabsList>
           </div>
 
