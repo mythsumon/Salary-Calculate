@@ -30,13 +30,10 @@ export function HistoryList({ periods, onDelete, onView }: HistoryListProps) {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-lg">
-                  {format(new Date(period.date), "MMMM yyyy")} Payment
+                  {format(new Date(period.date), "PPP")}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
                   {period.periodDays} days • {period.attendedDays} attended
-                  {period.settings.periodStartDate && period.settings.periodEndDate && (
-                    <> • {format(new Date(period.settings.periodStartDate), "MMM d")} - {format(new Date(period.settings.periodEndDate), "MMM d")}</>
-                  )}
                 </p>
               </div>
               <div className="flex gap-2">

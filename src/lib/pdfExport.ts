@@ -10,23 +10,13 @@ export function exportToPDF(period: PeriodData, result: CalculationResult) {
   doc.setFontSize(18)
   doc.text('Salary Calculation Report', 14, 20)
   
-  // Payment Month and Period Range
+  // Date
   doc.setFontSize(10)
   const periodDateStr = period.date || new Date().toISOString()
   const periodDate = new Date(periodDateStr)
-  const paymentMonth = format(periodDate, 'MMMM yyyy')
-  doc.text(`${paymentMonth} Payment`, 14, 30)
+  doc.text(`Period: ${format(periodDate, 'PPP')}`, 14, 30)
   
-  // Show period range if available
-  if (period.settings?.periodStartDate && period.settings?.periodEndDate) {
-    const startDate = new Date(period.settings.periodStartDate)
-    const endDate = new Date(period.settings.periodEndDate)
-    doc.text(`Period: ${format(startDate, 'MMM d')} - ${format(endDate, 'MMM d, yyyy')}`, 14, 37)
-  } else {
-    doc.text(`Period: ${format(periodDate, 'PPP')}`, 14, 37)
-  }
-  
-  let y = 45
+  let y = 40
   
   // Summary
   doc.setFontSize(14)

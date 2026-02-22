@@ -345,16 +345,24 @@ function App() {
     }
   }
 
-  const handleSavePeriod = () => {
-    // Use the start date (payment month) instead of current date
-    // If period is Feb 21 - Mar 20, payment month is February (start month)
-    const paymentDate = settings.periodStartDate 
-      ? new Date(settings.periodStartDate).toISOString()
-      : new Date().toISOString()
+  // Calculate payment date: period ends on day 20, payment comes around day 7-8 of next month
+  const calculatePaymentDate = (): string => {
+    if (!settings.periodEndDate) {
+      return new Date().toISOString()
+    }
     
+    const endDate = new Date(settings.periodEndDate)
+    // Payment comes around day 7-8 of the month after the period ends
+    // If period ends Feb 20, payment is March 7-8
+    // So: start of next month + 7 days
+    const paymentDate = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 7)
+    return paymentDate.toISOString()
+  }
+
+  const handleSavePeriod = () => {
     const periodData: PeriodData = {
       id: Date.now().toString(),
-      date: paymentDate,
+      date: calculatePaymentDate(),
       periodDays: settings.periodDays,
       attendedDays: result.attendedDays,
       netPay: result.netPay,
@@ -372,15 +380,9 @@ function App() {
   }
 
   const handleExportPDF = () => {
-    // Use the start date (payment month) instead of current date
-    // If period is Feb 21 - Mar 20, payment month is February (start month)
-    const paymentDate = settings.periodStartDate 
-      ? new Date(settings.periodStartDate).toISOString()
-      : new Date().toISOString()
-    
     const periodData: PeriodData = {
       id: Date.now().toString(),
-      date: paymentDate,
+      date: calculatePaymentDate(),
       periodDays: settings.periodDays,
       attendedDays: result.attendedDays,
       netPay: result.netPay,
