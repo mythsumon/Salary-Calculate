@@ -116,20 +116,15 @@ function App() {
   useEffect(() => {
     const savedSettings = getSettings()
     if (savedSettings) {
-      // If no end date, set default to day 20 of current month
+      // If no end date, set default: Start date January 21, 2026, End date February 20, 2026
       if (!savedSettings.periodEndDate) {
-        const now = new Date()
-        const targetMonth = now.getDate() > 20 ? now.getMonth() + 1 : now.getMonth()
-        const targetYear = now.getDate() > 20 && targetMonth === 0 ? now.getFullYear() + 1 : now.getFullYear()
-        const endDate = new Date(targetYear, targetMonth, 20)
+        const startDate = new Date(2026, 0, 21) // January 21, 2026
+        const endDate = new Date(2026, 1, 20)   // February 20, 2026
         savedSettings.periodEndDate = endDate.toISOString().split('T')[0]
-        
-        // Calculate start date: day 21 of previous month
-        const start = new Date(endDate.getFullYear(), endDate.getMonth() - 1, 21)
-        savedSettings.periodStartDate = start.toISOString().split('T')[0]
+        savedSettings.periodStartDate = startDate.toISOString().split('T')[0]
         
         // Calculate actual period days
-        const actualPeriodDays = Math.ceil((endDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+        const actualPeriodDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
         savedSettings.periodDays = actualPeriodDays
       } else if (savedSettings.periodEndDate) {
         // If end date exists, ensure it's day 20 and recalculate start date
@@ -151,14 +146,9 @@ function App() {
       setSettings(savedSettings)
       setDays(initializeDays(savedSettings.periodDays, savedSettings.periodStartDate))
     } else {
-      // Initialize default end date (day 20 of current month, or next month if past day 20)
-      const now = new Date()
-      const targetMonth = now.getDate() > 20 ? now.getMonth() + 1 : now.getMonth()
-      const targetYear = now.getDate() > 20 && targetMonth === 0 ? now.getFullYear() + 1 : now.getFullYear()
-      const endDate = new Date(targetYear, targetMonth, 20)
-      
-      // Start date: day 21 of previous month
-      const startDate = new Date(endDate.getFullYear(), endDate.getMonth() - 1, 21)
+      // Initialize default: Start date January 21, 2026, End date February 20, 2026
+      const startDate = new Date(2026, 0, 21) // January 21, 2026 (month 0 = January)
+      const endDate = new Date(2026, 1, 20)   // February 20, 2026 (month 1 = February)
       
       // Calculate actual period days
       const actualPeriodDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1

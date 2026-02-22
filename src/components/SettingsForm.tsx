@@ -21,11 +21,8 @@ export function SettingsForm({ settings, onSettingsChange }: SettingsFormProps) 
             id="periodEndDate"
             type="date"
             value={settings.periodEndDate || (() => {
-              const now = new Date()
-              // Default to day 20 of current month, or next month if current day > 20
-              const targetMonth = now.getDate() > 20 ? now.getMonth() + 1 : now.getMonth()
-              const targetYear = now.getDate() > 20 && targetMonth === 0 ? now.getFullYear() + 1 : now.getFullYear()
-              const endDate = new Date(targetYear, targetMonth, 20)
+              // Default: February 20, 2026
+              const endDate = new Date(2026, 1, 20)
               return endDate.toISOString().split('T')[0]
             })()}
             onChange={(e) => {
@@ -67,7 +64,11 @@ export function SettingsForm({ settings, onSettingsChange }: SettingsFormProps) 
           <Input
             id="periodStartDate"
             type="date"
-            value={settings.periodStartDate || ""}
+            value={settings.periodStartDate || (() => {
+              // Default: January 21, 2026
+              const startDate = new Date(2026, 0, 21)
+              return startDate.toISOString().split('T')[0]
+            })()}
             onChange={(e) => {
               const startDate = e.target.value
               if (startDate) {
