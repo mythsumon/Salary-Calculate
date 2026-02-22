@@ -116,17 +116,8 @@ function App() {
   useEffect(() => {
     const savedSettings = getSettings()
     if (savedSettings) {
-      // If no end date, set default: Start date January 21, 2026, End date February 20, 2026
-      if (!savedSettings.periodEndDate) {
-        const startDate = new Date(2026, 0, 21) // January 21, 2026
-        const endDate = new Date(2026, 1, 20)   // February 20, 2026
-        savedSettings.periodEndDate = endDate.toISOString().split('T')[0]
-        savedSettings.periodStartDate = startDate.toISOString().split('T')[0]
-        
-        // Calculate actual period days
-        const actualPeriodDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
-        savedSettings.periodDays = actualPeriodDays
-      } else if (savedSettings.periodEndDate) {
+      // Always correct dates to ensure start is day 21 and end is day 20
+      if (savedSettings.periodEndDate) {
         // If end date exists, ensure it's day 20 and recalculate start date
         const end = new Date(savedSettings.periodEndDate)
         end.setDate(20)
@@ -142,7 +133,32 @@ function App() {
         // Recalculate period days
         const actualPeriodDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
         savedSettings.periodDays = actualPeriodDays
+      } else if (savedSettings.periodStartDate) {
+        // If only start date exists, calculate end date from it
+        const start = new Date(savedSettings.periodStartDate)
+        start.setDate(21)
+        savedSettings.periodStartDate = start.toISOString().split('T')[0]
+        
+        // Calculate end date: day 20 of next month
+        const end = new Date(start.getFullYear(), start.getMonth() + 1, 20)
+        savedSettings.periodEndDate = end.toISOString().split('T')[0]
+        
+        // Calculate actual period days
+        const actualPeriodDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+        savedSettings.periodDays = actualPeriodDays
+      } else {
+        // No dates exist, set default: Start date January 21, 2026, End date February 20, 2026
+        const startDate = new Date(2026, 0, 21) // January 21, 2026
+        const endDate = new Date(2026, 1, 20)   // February 20, 2026
+        savedSettings.periodEndDate = endDate.toISOString().split('T')[0]
+        savedSettings.periodStartDate = startDate.toISOString().split('T')[0]
+        
+        // Calculate actual period days
+        const actualPeriodDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+        savedSettings.periodDays = actualPeriodDays
       }
+      // Save corrected settings back to localStorage
+      saveSettings(savedSettings)
       setSettings(savedSettings)
       setDays(initializeDays(savedSettings.periodDays, savedSettings.periodStartDate))
     } else {

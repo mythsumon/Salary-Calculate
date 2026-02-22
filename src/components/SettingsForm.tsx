@@ -73,20 +73,21 @@ export function SettingsForm({ settings, onSettingsChange }: SettingsFormProps) 
               const startDate = e.target.value
               if (startDate) {
                 const start = new Date(startDate)
-                // Ensure start date is day 21
+                // Ensure start date is day 21 of the selected month
                 start.setDate(21)
                 const correctedStartDate = start.toISOString().split('T')[0]
                 
-                // If end date exists, recalculate period days
-                let actualPeriodDays = settings.periodDays
-                if (settings.periodEndDate) {
-                  const end = new Date(settings.periodEndDate)
-                  actualPeriodDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
-                }
+                // Automatically calculate end date: day 20 of the next month
+                const end = new Date(start.getFullYear(), start.getMonth() + 1, 20)
+                const correctedEndDate = end.toISOString().split('T')[0]
+                
+                // Calculate actual period days
+                const actualPeriodDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
                 
                 onSettingsChange({
                   ...settings,
                   periodStartDate: correctedStartDate,
+                  periodEndDate: correctedEndDate,
                   periodDays: actualPeriodDays,
                 })
               }
