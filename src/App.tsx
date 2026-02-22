@@ -346,9 +346,15 @@ function App() {
   }
 
   const handleSavePeriod = () => {
+    // Use the start date (payment month) instead of current date
+    // If period is Feb 21 - Mar 20, payment month is February (start month)
+    const paymentDate = settings.periodStartDate 
+      ? new Date(settings.periodStartDate).toISOString()
+      : new Date().toISOString()
+    
     const periodData: PeriodData = {
       id: Date.now().toString(),
-      date: new Date().toISOString(),
+      date: paymentDate,
       periodDays: settings.periodDays,
       attendedDays: result.attendedDays,
       netPay: result.netPay,
@@ -366,9 +372,15 @@ function App() {
   }
 
   const handleExportPDF = () => {
+    // Use the start date (payment month) instead of current date
+    // If period is Feb 21 - Mar 20, payment month is February (start month)
+    const paymentDate = settings.periodStartDate 
+      ? new Date(settings.periodStartDate).toISOString()
+      : new Date().toISOString()
+    
     const periodData: PeriodData = {
       id: Date.now().toString(),
-      date: new Date().toISOString(),
+      date: paymentDate,
       periodDays: settings.periodDays,
       attendedDays: result.attendedDays,
       netPay: result.netPay,
